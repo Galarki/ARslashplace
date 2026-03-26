@@ -42,6 +42,31 @@ const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
 let color
+const modeBtn = document.querySelector('#mode-btn')
+const colorBtn = document.querySelector('.color-picker')
+
+modeBtn.addEventListener('click', () => {
+    modeBtn.style.backgroundColor = voxelRenderer.mode === 'place' ? 'red' : 'green'
+    modeBtn.textContent = `Current mode: ${voxelRenderer.mode === 'place' ? 'Delete' : 'Place'}`
+    voxelRenderer.mode = voxelRenderer.mode === 'place' ? 'delete' : 'place'
+})
+
+colorBtn.addEventListener('click', (event) => {
+    if (event.target.classList.contains('color-button')) {
+        const selectedColor = event.target.dataset.color
+        const allowedColors = ['red', 'green', 'blue']
+        if (!allowedColors.includes(selectedColor)) console.log(`${selectedColor} is not a valid color.`)
+        else color = selectedColor
+        const currentActive = colorBtn.querySelector('#active')
+        if (currentActive) currentActive.id = ""
+        event.target.id = 'active'
+    }
+})
+
+function animate() {
+    controls.update()
+    renderer.render(scene, camera);
+}
 
 function onMouseClick() {
     if (!voxelRenderer.ghostVisible) return
@@ -49,8 +74,29 @@ function onMouseClick() {
 
     if (voxelRenderer.mode === 'delete') {
         voxelRenderer.delete(x, y, z)
+        const payload = JSON.stringify({
+            type: 'voxelDelete',
+            data: {
+                x: x,
+                y: y,
+                z: z,
+                color: color
+            }
+        })
+        ws.send(payload)
+
     } else if (voxelRenderer.mode === 'place') {
         voxelRenderer.place(x, y, z, color)
+        const payload = JSON.stringify({
+            type: 'voxelUpdate',
+            data: {
+                x: x,
+                y: y,
+                z: z,
+                color: color
+            }
+        })
+        ws.send(payload)
     }
 }
 
@@ -90,31 +136,94 @@ function onMouseMove(event) {
     }
 }
 
-const modeBtn = document.querySelector('#mode-btn')
-const colorBtn = document.querySelector('.color-picker')
-modeBtn.addEventListener('click', () => {
-    modeBtn.style.backgroundColor = voxelRenderer.mode === 'place' ? 'red' : 'green'
-    modeBtn.textContent = `Current mode: ${voxelRenderer.mode === 'place' ? 'Delete' : 'Place'}`
-    voxelRenderer.mode = voxelRenderer.mode === 'place' ? 'delete' : 'place'
-})
-
-colorBtn.addEventListener('click', (event) => {
-    if (event.target.classList.contains('color-button')) {
-        const selectedColor = event.target.dataset.color
-        const allowedColors = ['red', 'green', 'blue']
-        if (!allowedColors.includes(selectedColor)) console.log(`${selectedColor} is not a valid color.`)
-        else color = selectedColor
-        const currentActive = colorBtn.querySelector('#active')
-        if (currentActive) currentActive.id = ""
-        event.target.id = 'active'
-    }
-})
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight
+    camera.updateProjectionMatrix()
+    renderer.setSize(window.innerWidth, window.innerHeight)
+}
 
 window.addEventListener('mousemove', onMouseMove)
 window.addEventListener('click', onMouseClick)
+window.addEventListener('resize', onWindowResize)
 
-function animate() {
-    controls.update()
-    renderer.render(scene, camera)
-}
+// AI generated dummy data, too lazy to do myself
+const dummyVoxels = [
+    // Ground layer (y = 0.5)
+    {x: 0, y: 0.5, z: 0, color: 0x8cff90},      // green
+    {x: 1, y: 0.5, z: 0, color: 0x8cff90},      // green
+    {x: 2, y: 0.5, z: 0, color: 0x8cff90},      // green
+    {x: -1, y: 0.5, z: 0, color: 0x8cff90},     // green
+    {x: -2, y: 0.5, z: 0, color: 0x8cff90},     // green
+    {x: 0, y: 0.5, z: 1, color: 0x8cff90},      // green
+    {x: 0, y: 0.5, z: -1, color: 0x8cff90},     // green
+    {x: 1, y: 0.5, z: 1, color: 0x8cff90},      // green
+    {x: -1, y: 0.5, z: -1, color: 0x8cff90},    // green
+
+    // Second layer (y = 1.5) - pyramid shape
+    {x: 0, y: 1.5, z: 0, color: 0xff0000},      // red
+    {x: 1, y: 1.5, z: 0, color: 0xff0000},      // red
+    {x: -1, y: 1.5, z: 0, color: 0xff0000},     // red
+    {x: 0, y: 1.5, z: 1, color: 0xff0000},      // red
+    {x: 0, y: 1.5, z: -1, color: 0xff0000},     // red
+
+    // Third layer (y = 2.5)
+    {x: 0, y: 2.5, z: 0, color: 0x0000ff},      // blue
+    {x: 1, y: 2.5, z: 0, color: 0x0000ff},      // blue
+
+    // Top (y = 3.5)
+    {x: 0, y: 3.5, z: 0, color: 0xffff00},      // yellow
+];
+
+dummyVoxels.forEach(voxel => {
+    voxelRenderer.place(voxel.x, voxel.y, voxel.z, voxel.color)
+})
+
+
+let ws = null
+const username = document.querySelector('#username')
+const btnConnect = document.querySelector('#connectWS')
+btnConnect.addEventListener('click', () => {
+    ws = new WebSocket(`ws://localhost:3000`)
+
+    ws.addEventListener('open', () => {
+        if (ws.readyState !== WebSocket.OPEN) return console.log('Not connected.')
+        const payload = JSON.stringify({
+            type: 'join',
+            username: username.value
+        })
+        console.log('Connected.')
+        btnConnect.style.display = 'none'
+
+        ws.send(payload)
+    })
+
+    ws.addEventListener('close', () => {
+        btnConnect.style.display = 'block'
+        console.log('Websocket connection has been closed.')
+    })
+
+    ws.addEventListener('error', () => {
+        console.log('Something went wrong with the websocket connection.')
+    })
+
+    ws.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data)
+
+        if (data.type === 'message') {
+
+        } else if (data.type === 'voxelUpdate') {
+            const {x, y, z, color} = data.data
+            voxelRenderer.place(x, y, z, color)
+            console.log(`Voxel with properties: x${x}, y${y}, z${z}, ${color} has been placed.`)
+        } else if (data.type === 'voxelDelete') {
+            const {x, y, z} = data.data
+            voxelRenderer.delete(x, y, z)
+            console.log(`Voxel with properties ${data.data} has been deleted.`)
+        }
+    })
+})
+
+
+
+
 
