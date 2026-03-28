@@ -1,8 +1,9 @@
 import * as THREE from 'three'
-import {VRButton} from "three/addons/webxr/VRButton.js";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+import {ARButton, CSS2DRenderer} from "three/addons";
 import VoxelEngine from "./VoxelEngine.js";
 import VoxelRenderer from "./VoxelRenderer.js";
+import {PlayerAvatar} from "./PlayerAvatar.js";
 
 const scene = new THREE.Scene()
 const fov = 75
@@ -12,18 +13,31 @@ const far = 1000
 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 const canvas = document.querySelector('#c')
 const renderer = new THREE.WebGLRenderer({
-    canvas, alpha: true, premultipliedAlpha: false
+    canvas,
+    alpha: true,
+    premultipliedAlpha: false
 })
 renderer.xr.enabled = true;
+renderer.xr.setReferenceSpaceType('local-floor')
+renderer.setClearColor(0x000000, 0)
 
-camera.position.set(0, 1, 6)
+const labelRenderer = new CSS2DRenderer()
+labelRenderer.setSize(window.innerWidth, window.innerHeight)
+labelRenderer.domElement.style.position = 'absolute'
+labelRenderer.domElement.style.pointerEvents = 'none'
+document.body.appendChild(labelRenderer.domElement)
+
+
+camera.position.set(0, 5, 20)
 
 const controls = new OrbitControls(camera, renderer.domElement)
 
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setAnimationLoop(animate)
 document.body.appendChild(renderer.domElement)
-document.body.appendChild(VRButton.createButton(renderer));
+document.body.appendChild(ARButton.createButton(renderer, {
+    requiredFeatures: ['hit-test', 'local-floor'],
+}));
 
 const gridHelper = new THREE.GridHelper(30, 30)
 const groundGeo = new THREE.PlaneGeometry(30, 30)
@@ -63,9 +77,31 @@ colorBtn.addEventListener('click', (event) => {
     }
 })
 
+let timePassed = 0
+let cameraPosition = camera.position
+let cameraRotation = camera.rotation
+
 function animate() {
     controls.update()
     renderer.render(scene, camera);
+    labelRenderer.render(scene, camera)
+
+    if (ws === null || ws.readyState !== WebSocket.OPEN) return
+    const now = Date.now()
+    //  Should also check if user ACTUALLY moved, not just time
+    if (now - timePassed > 500) {
+        const payload = JSON.stringify({
+            type: 'cameraUpdate',
+            data: {
+                position: camera.position,
+                rotation: camera.rotation
+            }
+        })
+
+        ws.send(payload)
+        timePassed = now
+    }
+
 }
 
 function onMouseClick() {
@@ -87,16 +123,18 @@ function onMouseClick() {
 
     } else if (voxelRenderer.mode === 'place') {
         voxelRenderer.place(x, y, z, color)
-        const payload = JSON.stringify({
-            type: 'voxelUpdate',
-            data: {
-                x: x,
-                y: y,
-                z: z,
-                color: color
-            }
-        })
-        ws.send(payload)
+        if (ws !== null) {
+            const payload = JSON.stringify({
+                type: 'voxelUpdate',
+                data: {
+                    x: x,
+                    y: y,
+                    z: z,
+                    color: color
+                }
+            })
+            ws.send(payload)
+        }
     }
 }
 
@@ -140,6 +178,7 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight
     camera.updateProjectionMatrix()
     renderer.setSize(window.innerWidth, window.innerHeight)
+    labelRenderer.setSize(window.innerWidth, window.innerHeight)
 }
 
 window.addEventListener('mousemove', onMouseMove)
@@ -178,7 +217,7 @@ dummyVoxels.forEach(voxel => {
     voxelRenderer.place(voxel.x, voxel.y, voxel.z, voxel.color)
 })
 
-
+const players = new Map()
 let ws = null
 const username = document.querySelector('#username')
 const btnConnect = document.querySelector('#connectWS')
@@ -189,7 +228,11 @@ btnConnect.addEventListener('click', () => {
         if (ws.readyState !== WebSocket.OPEN) return console.log('Not connected.')
         const payload = JSON.stringify({
             type: 'join',
-            username: username.value
+            username: username.value,
+            coordinates: {
+                position: camera.position,
+                rotation: camera.rotation
+            }
         })
         console.log('Connected.')
         btnConnect.style.display = 'none'
@@ -211,6 +254,17 @@ btnConnect.addEventListener('click', () => {
 
         if (data.type === 'message') {
 
+        } else if (data.type === 'users') {
+            data.users.forEach((v) => {
+                const pa = new PlayerAvatar(v.username, scene)
+                players.set(v.username, pa)
+                console.log(data)
+                //pa.update(data.users.coordinates[1].position)
+            })
+        } else if (data.type === 'userJoin') {
+            const pa = new PlayerAvatar(data.username, scene)
+            pa.update(data.coordinates.position)
+            players.set(data.username, pa)
         } else if (data.type === 'voxelUpdate') {
             const {x, y, z, color} = data.data
             voxelRenderer.place(x, y, z, color)
@@ -219,6 +273,13 @@ btnConnect.addEventListener('click', () => {
             const {x, y, z} = data.data
             voxelRenderer.delete(x, y, z)
             console.log(`Voxel with properties ${data.data} has been deleted.`)
+        } else if (data.type === 'cameraUpdate') {
+            const position = data.data.position
+            players.get(data.username).update(position)
+        } else if (data.type === 'userDisconnected') {
+            console.log(`${data.username} has left the server.`)
+            const pd = players.get(data.username)
+            pd.remove()
         }
     })
 })

@@ -10,10 +10,13 @@ const httpServer = createServer(async (req, res) => {
 
 const wss = new WebSocketServer({server: httpServer})
 const clients = new Map()
+const voxels = new Map()
 
 function broadcastClients(wss, payload) {
     wss.clients.forEach((client) => {
-        client.send(payload)
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(payload)
+        }
     })
 }
 
@@ -21,46 +24,70 @@ wss.on('connection', (ws, request) => {
     console.log('Client connected')
     ws.on('message', (data) => {
         const message = JSON.parse(data)
-        console.log(message)
-
+        //console.log(message)
         if (message.type === 'join') {
-            console.log(message.username)
-            clients.set(ws, message.username)
+            clients.set(ws, {
+                username: message.username,
+                coordinates: message.coordinates
+            })
+
+            const existingClients = Array.from(clients.entries())
+                .filter(([client]) => client !== ws)
+                .map(([, data]) => data)
+
+            const existingPayload = JSON.stringify({
+                type: 'users',
+                users: existingClients
+            })
+
+            ws.send(existingPayload)
 
             const payload = JSON.stringify({
-                type: 'users',
-                users: Array.from(clients.values())
+                type: 'userJoin',
+                username: message.username,
+                coordinates: message.coordinates
             })
 
             wss.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN) {
+                if (ws !== client && client.readyState === WebSocket.OPEN) {
                     client.send(payload)
                 }
             })
         } else if (message.type === 'voxelUpdate') {
-            console.log(message.data)
-
             const payload = JSON.stringify({
                 type: 'voxelUpdate',
                 data: message.data
             })
             broadcastClients(wss, payload)
-            console.log('Everything has been broadcast.')
-
         } else if (message.type === 'voxelDelete') {
-
+            const payload = JSON.stringify({
+                type: 'voxelDelete',
+                data: message.data
+            })
+            broadcastClients(wss, payload)
+        } else if (message.type === 'cameraUpdate') {
+            const payload = JSON.stringify({
+                type: 'cameraUpdate',
+                username: clients.get(ws).username,
+                data: message.data
+            })
+            wss.clients.forEach((client) => {
+                if (ws !== client && client.readyState === WebSocket.OPEN) {
+                    client.send(payload)
+                }
+            })
         }
     })
 
     ws.on('close', () => {
-        console.log(`Websocket connection with user ${clients.get(ws)} has been closed.`)
-
-        clients.delete(ws)
+        console.log(`Websocket connection with user ${clients.get(ws).username} has been closed.`)
 
         const payload = JSON.stringify({
-            type: 'users',
-            users: Array.from(clients.values())
+            type: 'userDisconnected',
+            username: clients.get(ws).username
         })
+
+        clients.delete(ws)
 
         wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
