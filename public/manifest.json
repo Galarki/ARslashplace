@@ -1,0 +1,23 @@
+{
+  "name": "ARslashPlace",
+  "short_name": "ARPlace",
+  "lang": "en-US",
+  "description": "A worldwide canvas where a user can place voxels",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "icons/192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
