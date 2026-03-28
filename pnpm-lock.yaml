@@ -11,6 +11,9 @@ importers:
       three:
         specifier: ^0.183.2
         version: 0.183.2
+      ws:
+        specifier: ^8.20.0
+        version: 8.20.0
     devDependencies:
       vite:
         specifier: ^7.3.1
@@ -393,6 +396,18 @@ packages:
       yaml:
         optional: true
 
+  ws@8.20.0:
+    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
 snapshots:
 
   '@esbuild/aix-ppc64@0.27.3':
@@ -648,3 +663,5 @@ snapshots:
       tinyglobby: 0.2.15
     optionalDependencies:
       fsevents: 2.3.3
+
+  ws@8.20.0: {}
