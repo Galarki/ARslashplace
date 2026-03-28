@@ -1,11 +1,26 @@
 import {createServer} from 'http';
 import {WebSocket, WebSocketServer} from 'ws';
+import {readFile} from 'fs/promises';
+import 'dotenv/config'
 
 
 const httpServer = createServer(async (req, res) => {
     const url = req.url
-    res.writeHead(200)
-    res.end('Websocket server running')
+    //res.writeHead(200)
+    //res.end('Websocket server running')
+    try {
+        if (url === '/rss') {
+            // should use .env, but node does not like
+            const file = await readFile(`./changelogs.xml`)
+            res.writeHead(200, {'Content-Type': 'application/rss+xml; charset=utf-8'})
+            res.end(file)
+        }
+    } catch(err) {
+        console.error('Could not read changelogs', err)
+        res.writeHead(500)
+        res.end('No feed.')
+    }
+
 })
 
 const wss = new WebSocketServer({server: httpServer})
@@ -102,6 +117,7 @@ wss.on('connection', (ws, request) => {
     })
 })
 
-httpServer.listen(3000, () => {
-    console.log(`Listening on port 3000`)
+const PORT = process.env.PORT || 3000;
+httpServer.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`)
 })
