@@ -221,7 +221,7 @@ let ws = null
 const username = document.querySelector('#username')
 const btnConnect = document.querySelector('#connectWS')
 btnConnect.addEventListener('click', () => {
-    ws = new WebSocket(`wss://arslashplace-production.up.railway.app/`)
+    ws = new WebSocket(`${import.meta.env.VITE_API_BASE_URL_WS}`)
 
     ws.addEventListener('open', () => {
         if (ws.readyState !== WebSocket.OPEN) return console.log('Not connected.')
