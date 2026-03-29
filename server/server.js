@@ -90,6 +90,8 @@ wss.on('connection', (ws, request) => {
             })
             broadcastClients(wss, payload)
         } else if (message.type === 'voxelDelete') {
+            const {x, y, z} = message.data
+            voxels.delete(toKey(x, y, z))
             const payload = JSON.stringify({
                 type: 'voxelDelete',
                 data: message.data

@@ -109,17 +109,18 @@ function onMouseClick() {
 
     if (voxelRenderer.mode === 'delete') {
         voxelRenderer.delete(x, y, z)
-        const payload = JSON.stringify({
-            type: 'voxelDelete',
-            data: {
-                x: x,
-                y: y,
-                z: z,
-                color: color
-            }
-        })
-        ws.send(payload)
-
+        if (ws !== null) {
+            const payload = JSON.stringify({
+                type: 'voxelDelete',
+                data: {
+                    x: x,
+                    y: y,
+                    z: z,
+                    color: color
+                }
+            })
+            ws.send(payload)
+        }
     } else if (voxelRenderer.mode === 'place') {
         voxelRenderer.place(x, y, z, color)
         if (ws !== null) {
@@ -225,7 +226,7 @@ btnConnect.addEventListener('click', () => {
             data.users.forEach((v) => {
                 const pa = new PlayerAvatar(v.username, scene)
                 players.set(v.username, pa)
-                console.log(data)
+                //console.log(data)
                 //pa.update(data.users.coordinates[1].position)
             })
             data.voxels.forEach((voxel) => {
