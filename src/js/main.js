@@ -60,8 +60,7 @@ const modeBtn = document.querySelector('#mode-btn')
 const colorBtn = document.querySelector('.color-picker')
 
 modeBtn.addEventListener('click', () => {
-    modeBtn.style.backgroundColor = voxelRenderer.mode === 'place' ? 'red' : 'green'
-    modeBtn.textContent = `Current mode: ${voxelRenderer.mode === 'place' ? 'Delete' : 'Place'}`
+    modeBtn.textContent = `${voxelRenderer.mode === 'place' ? 'Delete' : 'Place'}`
     voxelRenderer.mode = voxelRenderer.mode === 'place' ? 'delete' : 'place'
 })
 

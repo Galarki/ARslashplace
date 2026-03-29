@@ -2,31 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>My first three.js app</title>
+    <title>arslashplace</title>
     <link rel="stylesheet" href="styles/style.css">
     <link rel="manifest" href="/manifest.json">
 </head>
 <body id="container">
+<header>
+    <nav>
+        <ul>
+            <li><a id="active-tab" href="#">Home</a></li>
+            <li><a href="./about">About</a></li>
+            <li><a href="">Changelogs</a></li>
+        </ul>
+        <span id="line"></span>
+        <span id="WebGLWarning" style="display: none;"></span>
+        <canvas id="c"></canvas>
+        <section class="GUI">
+            <div>
+                <h2>Current mode:</h2>
+                <button id="mode-btn">Place</button>
+            </div>
+            <div class="color-picker">
+                <h2>Color picker</h2>
+                <button data-color="red" class="color-button"></button>
+                <button data-color="blue" class="color-button"></button>
+                <button data-color="green" class="color-button"></button>
+            </div>
+            <div>
+                <label for="username">
+                    <span></span>
+                </label>
+                <input type="text" id="username" name="username" placeholder="username">
+                <button id="connectWS">Connect to server.</button>
+            </div>
+        </section>
+    </nav>
+</header>
 <main>
-    <span id="WebGLWarning" style="display: none;"></span>
-    <canvas id="c"></canvas>
-    <section class="GUI">
-        <h2>
-            <button id="mode-btn">Current mode: Place</button>
-        </h2>
-        <div class="color-picker">
-            <button data-color="red" class="color-button">Red</button>
-            <button data-color="blue" class="color-button">Blue</button>
-            <button data-color="green" class="color-button">Green</button>
-        </div>
-        <div>
-            <label for="username">
-                <span></span>
-            </label>
-            <input type="text" id="username" name="username" placeholder="username">
-            <button id="connectWS">Connect to server.</button>
-        </div>
-    </section>
+
 </main>
 </body>
 </html>

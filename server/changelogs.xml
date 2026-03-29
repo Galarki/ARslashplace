@@ -2,11 +2,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Changelogs arslashplace</title>
-        <link>https://arslash.place</link>
+        <link>https://arslashplace.vercel.app</link>
         <description>Changelogs arslashplace</description>
         <language>en-us</language>
         <lastBuildDate>Sat, 28 Mar 2026 00:00:00 GMT</lastBuildDate>
-        <atom:link href="https://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
+        <atom:link href="https://arslashplace-production.up.railway.app/changelogs.xml" rel="self" type="application/rss+xml"/>
 
         <item>
             <guid isPermaLink="false">article2</guid>
