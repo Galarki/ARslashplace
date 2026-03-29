@@ -31,7 +31,7 @@ export default class VoxelRenderer {
         return [this.#groundPlane, ...this.#voxels.values()]
     }
 
-    place(x, y, z, color = 0x8cff90) {
+    place(x, y, z, color = 'red') {
         if (!this.#engine.place(x, y, z, color)) return
         if (!this.#materials.has(color)) {
             this.#materials.set(color, new THREE.MeshBasicMaterial({color}))

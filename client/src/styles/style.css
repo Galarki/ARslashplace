@@ -12,8 +12,9 @@ html, body {
     height: 100%;
     width: 100%;
     font-family: 'Lato', sans-serif;
-    color: var(--dark);
+    color: var(--orange)
 }
+
 #c {
     width: 100%;
     height: 100%;
@@ -40,22 +41,29 @@ button {
         background: revert;
         box-shadow: unset;
     }
+
     &[data-color='red'] {
         background: red;
     }
+
     &[data-color='blue'] {
         background: blue;
     }
+
     &[data-color='green'] {
         background: green;
 
+    }
+
+    &#connectWS:hover {
+        background: var(--tertiary);
     }
 }
 
 #mode-btn {
     cursor: pointer;
     background: var(--orange);
-
+    color: var(--primary)
 }
 
 .color-picker {
@@ -75,6 +83,7 @@ button {
 #active {
     border: 4px solid var(--orange);
     box-shadow: var(--yellow) 4px 4px 0 0;
+
     &:hover, &:focus {
         border-color: var(--yellow);
         box-shadow: unset;
@@ -84,6 +93,7 @@ button {
 #active-tab {
 
 }
+
 nav {
     position: absolute;
     background: var(--primary);
@@ -100,7 +110,6 @@ nav {
         margin: 0;
 
         a {
-            color: var(--dark);
             text-decoration: none;
             font-family: Lato, sans-serif;
 
@@ -110,6 +119,7 @@ nav {
         }
     }
 }
+
 input {
     border: 4px solid var(--secondary);
     padding: 0;
@@ -119,6 +129,7 @@ input {
     box-shadow: var(--tertiary) 4px 4px 0 0;
 
 }
+
 #line {
     padding: 1px;
     opacity: 20%;

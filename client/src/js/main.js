@@ -38,9 +38,8 @@ document.body.appendChild(renderer.domElement)
 document.body.appendChild(ARButton.createButton(renderer, {
     requiredFeatures: ['hit-test', 'local-floor'],
 }));
-
-const gridHelper = new THREE.GridHelper(30, 30)
-const groundGeo = new THREE.PlaneGeometry(30, 30)
+const gridHelper = new THREE.GridHelper(100, 100)
+const groundGeo = new THREE.PlaneGeometry(100, 100)
 const groundMat = new THREE.MeshBasicMaterial({visible: false, side: THREE.DoubleSide})
 const groundPlane = new THREE.Mesh(groundGeo, groundMat)
 
