@@ -75,6 +75,10 @@ button {
 #active {
     border: 4px solid var(--orange);
     box-shadow: var(--yellow) 4px 4px 0 0;
+    &:hover, &:focus {
+        border-color: var(--yellow);
+        box-shadow: unset;
+    }
 }
 
 #active-tab {
