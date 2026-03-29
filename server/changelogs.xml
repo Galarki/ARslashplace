@@ -5,24 +5,22 @@
         <link>https://arslashplace.vercel.app</link>
         <description>Changelogs arslashplace</description>
         <language>en-us</language>
-        <lastBuildDate>Sat, 28 Mar 2026 00:00:00 GMT</lastBuildDate>
-        <atom:link href="https://arslashplace-production.up.railway.app/changelogs.xml" rel="self" type="application/rss+xml"/>
+        <lastBuildDate>Sat, 29 Mar 2026 20:00:00 GMT</lastBuildDate>
+        <atom:link href="https://arslashplace-production.up.railway.app/rss" rel="self" type="application/rss+xml"/>
 
         <item>
             <guid isPermaLink="false">article2</guid>
             <title>Great tinkering!</title>
-            <link> </link>
-            <pubDate> </pubDate>
+            <link>https://arslashplace.vercel.app/changelogs</link>
+            <pubDate>Sat, 28 Mar 2026 14:33:23 GMT</pubDate>
             <description>We have figured out how to create a ghost voxel to decide where a voxel will be placed!</description>
         </item>
         <item>
             <guid isPermaLink="false">article1</guid>
             <title>My First Post</title>
-            <link> </link>
-            <pubDate> </pubDate>
-            <description>Setup a project with threejs and create your own minecraft from the Aldi!</description>
+            <link>https://arslashplace.vercel.app/changelogs</link>
+            <pubDate>Fri, 27 Mar 2026 13:12:12 GMT</pubDate>
+            <description>Set up a project with threejs and create your own minecraft from the Aldi!</description>
         </item>
-
-
     </channel>
 </rss>

@@ -184,38 +184,6 @@ window.addEventListener('mousemove', onMouseMove)
 window.addEventListener('click', onMouseClick)
 window.addEventListener('resize', onWindowResize)
 
-// AI generated dummy data, too lazy to do myself
-const dummyVoxels = [
-    // Ground layer (y = 0.5)
-    {x: 0, y: 0.5, z: 0, color: 0x8cff90},      // green
-    {x: 1, y: 0.5, z: 0, color: 0x8cff90},      // green
-    {x: 2, y: 0.5, z: 0, color: 0x8cff90},      // green
-    {x: -1, y: 0.5, z: 0, color: 0x8cff90},     // green
-    {x: -2, y: 0.5, z: 0, color: 0x8cff90},     // green
-    {x: 0, y: 0.5, z: 1, color: 0x8cff90},      // green
-    {x: 0, y: 0.5, z: -1, color: 0x8cff90},     // green
-    {x: 1, y: 0.5, z: 1, color: 0x8cff90},      // green
-    {x: -1, y: 0.5, z: -1, color: 0x8cff90},    // green
-
-    // Second layer (y = 1.5) - pyramid shape
-    {x: 0, y: 1.5, z: 0, color: 0xff0000},      // red
-    {x: 1, y: 1.5, z: 0, color: 0xff0000},      // red
-    {x: -1, y: 1.5, z: 0, color: 0xff0000},     // red
-    {x: 0, y: 1.5, z: 1, color: 0xff0000},      // red
-    {x: 0, y: 1.5, z: -1, color: 0xff0000},     // red
-
-    // Third layer (y = 2.5)
-    {x: 0, y: 2.5, z: 0, color: 0x0000ff},      // blue
-    {x: 1, y: 2.5, z: 0, color: 0x0000ff},      // blue
-
-    // Top (y = 3.5)
-    {x: 0, y: 3.5, z: 0, color: 0xffff00},      // yellow
-];
-
-dummyVoxels.forEach(voxel => {
-    voxelRenderer.place(voxel.x, voxel.y, voxel.z, voxel.color)
-})
-
 const players = new Map()
 let ws = null
 const username = document.querySelector('#username')
@@ -259,6 +227,10 @@ btnConnect.addEventListener('click', () => {
                 players.set(v.username, pa)
                 console.log(data)
                 //pa.update(data.users.coordinates[1].position)
+            })
+            data.voxels.forEach((voxel) => {
+                const {x, y, z, color} = voxel
+                voxelRenderer.place(x, y, z, color)
             })
         } else if (data.type === 'userJoin') {
             const pa = new PlayerAvatar(data.username, scene)

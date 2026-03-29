@@ -15,7 +15,7 @@ const httpServer = createServer(async (req, res) => {
             res.writeHead(200, {'Content-Type': 'application/rss+xml; charset=utf-8'})
             res.end(file)
         }
-    } catch(err) {
+    } catch (err) {
         console.error('Could not read changelogs', err)
         res.writeHead(500)
         res.end('No feed.')
@@ -41,8 +41,9 @@ wss.on('connection', (ws, request) => {
         const message = JSON.parse(data)
         //console.log(message)
         if (message.type === 'join') {
+            const username = message.username ? message.username : 'visitor'
             clients.set(ws, {
-                username: message.username,
+                username: username,
                 coordinates: message.coordinates
             })
 
@@ -50,16 +51,28 @@ wss.on('connection', (ws, request) => {
                 .filter(([client]) => client !== ws)
                 .map(([, data]) => data)
 
+            const existingVoxels = Array.from(voxels.entries())
+                .map(([key, color]) => {
+                    const [x, y, z] = key.split(',')
+                    return {
+                        x: x,
+                        y: y,
+                        z: z,
+                        color: color
+                    }
+                })
+
             const existingPayload = JSON.stringify({
                 type: 'users',
-                users: existingClients
+                users: existingClients,
+                voxels: existingVoxels
             })
 
             ws.send(existingPayload)
 
             const payload = JSON.stringify({
                 type: 'userJoin',
-                username: message.username,
+                username: username,
                 coordinates: message.coordinates
             })
 
@@ -69,6 +82,8 @@ wss.on('connection', (ws, request) => {
                 }
             })
         } else if (message.type === 'voxelUpdate') {
+            const {x, y, z, color} = message.data
+            voxels.set(toKey(x, y, z), color)
             const payload = JSON.stringify({
                 type: 'voxelUpdate',
                 data: message.data
@@ -116,6 +131,10 @@ wss.on('connection', (ws, request) => {
 
     })
 })
+
+function toKey(x, y, z) {
+    return `${x},${y},${z}`
+}
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
